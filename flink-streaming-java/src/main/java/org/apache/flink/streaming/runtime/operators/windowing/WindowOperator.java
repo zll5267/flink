@@ -404,7 +404,9 @@ public class WindowOperator<K, IN, ACC, OUT, W extends Window>
                 if (triggerResult.isPurge()) {
                     windowState.clear();
                 }
-                registerCleanupTimer(actualWindow);
+                if (!triggerResult.isDisableClearTimer()) {
+                    registerCleanupTimer(actualWindow);
+                }
             }
 
             // need to make sure to update the merging state in state
@@ -437,7 +439,9 @@ public class WindowOperator<K, IN, ACC, OUT, W extends Window>
                 if (triggerResult.isPurge()) {
                     windowState.clear();
                 }
-                registerCleanupTimer(window);
+                if (!triggerResult.isDisableClearTimer()) {
+                    registerCleanupTimer(window);
+                }
             }
         }
 
@@ -491,8 +495,8 @@ public class WindowOperator<K, IN, ACC, OUT, W extends Window>
             windowState.clear();
         }
 
-        if (windowAssigner.isEventTime()
-                && isCleanupTime(triggerContext.window, timer.getTimestamp())) {
+        if (triggerResult.isClearState() || (windowAssigner.isEventTime()
+                && isCleanupTime(triggerContext.window, timer.getTimestamp()))) {
             clearAllState(triggerContext.window, windowState, mergingWindows);
         }
 
@@ -538,8 +542,8 @@ public class WindowOperator<K, IN, ACC, OUT, W extends Window>
             windowState.clear();
         }
 
-        if (!windowAssigner.isEventTime()
-                && isCleanupTime(triggerContext.window, timer.getTimestamp())) {
+        if (triggerResult.isClearState() || (!windowAssigner.isEventTime()
+                && isCleanupTime(triggerContext.window, timer.getTimestamp()))) {
             clearAllState(triggerContext.window, windowState, mergingWindows);
         }
 

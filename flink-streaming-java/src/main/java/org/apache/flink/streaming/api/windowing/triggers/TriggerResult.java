@@ -29,31 +29,39 @@ package org.apache.flink.streaming.api.windowing.triggers;
 public enum TriggerResult {
 
     /** No action is taken on the window. */
-    CONTINUE(false, false),
+    CONTINUE(false, false, false, false),
 
     /** {@code FIRE_AND_PURGE} evaluates the window function and emits the window result. */
-    FIRE_AND_PURGE(true, true),
+    FIRE_AND_PURGE(true, true, false, false),
+
+    FIRE_AND_PURGE_WITH_CLEAR_STATE(true, true, true, false),
 
     /**
      * On {@code FIRE}, the window is evaluated and results are emitted. The window is not purged,
      * though, all elements are retained.
      */
-    FIRE(true, false),
+    FIRE(true, false, false, false),
 
     /**
      * All elements in the window are cleared and the window is discarded, without evaluating the
      * window function or emitting any elements.
      */
-    PURGE(false, true);
+    PURGE(false, true, false, false),
+
+    CONTINUE_WITHOUT_CLEAR_TIMER(false, true, false, true);
 
     // ------------------------------------------------------------------------
 
     private final boolean fire;
     private final boolean purge;
+    private final boolean clearState;
+    private final boolean disableClearTimer;
 
-    TriggerResult(boolean fire, boolean purge) {
+    TriggerResult(boolean fire, boolean purge, boolean clearState, boolean disableClearTimer) {
         this.purge = purge;
         this.fire = fire;
+        this.disableClearTimer = disableClearTimer;
+        this.clearState = clearState;
     }
 
     public boolean isFire() {
@@ -62,5 +70,13 @@ public enum TriggerResult {
 
     public boolean isPurge() {
         return purge;
+    }
+
+    public boolean isClearState() {
+        return clearState;
+    }
+
+    public boolean isDisableClearTimer() {
+        return disableClearTimer;
     }
 }
